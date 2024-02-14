@@ -1,0 +1,41 @@
+version: 3
+
+dotenv: ['.secret.env', '.env']
+
+output: prefixed
+
+includes:
+  install:
+    taskfile: ./Install.Taskfile.yaml
+    dir: .
+
+tasks:
+  env:
+    desc: Show all KCONF_ environment variables.
+    cmds:
+      - env | grep KCONF_
+  init_minimal_config:
+    desc: Initialize minimal configuration
+    preconditions:
+      - sh: "[ -f ${KCONF_CONFIG_PATH} ]"
+        msg: "Config already exists, to override use --force"
+    cmds:
+      - cat examples/minimal.yaml | sed "s|KUBE_CONTEXT_NAME|{{.KUBE_CONTEXT_NAME}}|g" > {{.KCONF_CONFIG_PATH}}
+    requires:
+      vars: [KUBE_CONTEXT_NAME]
+  setup:
+    desc: Install (if not installed) and configure tools appropriate for currently used cluster (current kubectl context)
+    cmds:
+      - echo "alias kubeseal={{.KCONF_TOOLS_BINARIES_DIR}}/kubeseal-{{.KUBESEAL_VERSION}}" > env_source.tmp
+      - task: install:kubeseal
+        vars:
+          VERSION: "{{.KUBESEAL_VERSION}}"
+      - echo "alias argocd={{.KCONF_TOOLS_BINARIES_DIR}}/argocd-{{.ARGOCD_VERSION}}" >> env_source.tmp
+      - task: install:argocd
+        vars:
+          VERSION: "{{.ARGOCD_VERSION}}"
+    vars:
+      KUBESEAL_VERSION:
+        sh: export KUBE_CONTEXT=$(kubectl config current-context) && cat {{.KCONF_CONFIG_PATH}} | yq ".${KUBE_CONTEXT}.configuration.tools.kubeseal"
+      ARGOCD_VERSION:
+        sh: export KUBE_CONTEXT=$(kubectl config current-context) && cat {{.KCONF_CONFIG_PATH}} | yq ".${KUBE_CONTEXT}.configuration.tools.argocd"

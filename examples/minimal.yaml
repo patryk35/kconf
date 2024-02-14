@@ -1,0 +1,6 @@
+KUBE_CONTEXT_NAME:
+  vars: {}
+  configuration:
+    tools:
+      argocd: 2.10.1
+      kubeseal: 0.25.0

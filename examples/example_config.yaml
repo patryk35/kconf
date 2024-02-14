@@ -1,0 +1,18 @@
+kube_context_name:
+  vars:
+    NEWRELIC_NAME: "kube_context_name"
+  configuration:
+    tools:
+      argocd: 2.10.0
+      kubeseal: 0.25.0
+minikube:
+  #  kubefile: ~/.kube/config
+  # TODO: replace vars in configuration when needed
+  vars:
+    NEWRELIC_NAME: "minikube"
+  configuration:
+    tools:
+#      kubectl: 1.29.1
+#      kustomize: 5.0.1
+      argocd: 2.10.0
+      kubeseal: 0.24.0

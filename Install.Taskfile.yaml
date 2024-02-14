@@ -1,0 +1,39 @@
+version: 3
+
+output: prefixed
+
+# TODO: verify binaries/archives after download
+tasks:
+  kubeseal:
+    desc: Install kubeseal
+    status:
+      - ls {{.KCONF_TOOLS_BINARIES_DIR}} | grep -w "kubeseal-{{.VERSION}}$"
+    preconditions:
+      - sh: 'mkdir -p {{.KCONF_TOOLS_BINARIES_DIR}}'
+    cmds:
+      - rm -rf /tmp/kubeseal-{{.VERSION}}-linux-amd64.tar.gz
+      - wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v{{.VERSION}}/kubeseal-{{.VERSION}}-linux-{{.CPU_ARCH}}.tar.gz -O/tmp/kubeseal-{{.VERSION}}-linux-{{.CPU_ARCH}}.tar.gz
+      - tar -xvf /tmp/kubeseal-{{.VERSION}}-linux-{{.CPU_ARCH}}.tar.gz -C /tmp
+      - chmod +x /tmp/kubeseal
+      - mv /tmp/kubeseal {{.KCONF_TOOLS_BINARIES_DIR}}/kubeseal-{{.VERSION}}
+    vars:
+      CPU_ARCH:
+        sh: echo "amd64" # TODO
+    requires:
+      vars: [VERSION]
+  argocd:
+    desc: Install argocd
+    status:
+      - ls {{.KCONF_TOOLS_BINARIES_DIR}} | grep -w "argocd-{{.VERSION}}$"
+    preconditions:
+      - sh: 'mkdir -p {{.KCONF_TOOLS_BINARIES_DIR}}'
+    cmds:
+      - rm -rf {{.KCONF_TOOLS_BINARIES_DIR}}/argocd-{{.VERSION}}
+      - wget https://github.com/argoproj/argo-cd/releases/download/v{{.VERSION}}/argocd-linux-{{.CPU_ARCH}} -O {{.KCONF_TOOLS_BINARIES_DIR}}/argocd-{{.VERSION}}
+      - chmod +x {{.KCONF_TOOLS_BINARIES_DIR}}/argocd-{{.VERSION}}
+    vars:
+      CPU_ARCH:
+        sh: echo "amd64" # TODO
+    requires:
+      vars: [VERSION]
+
